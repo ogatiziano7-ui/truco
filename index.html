@@ -146,9 +146,15 @@ footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--linea);color:
 .sheet{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 68px);display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:10px;background:#0a0f0cf0;border-top:1px solid var(--linea);z-index:5}
 .vel{position:absolute;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;z-index:9;padding:18px}
 .vel .panel{margin:0;text-align:center}
-.envres{position:absolute;right:10px;top:34px;max-width:55%;background:#000a;border:1px solid var(--oro);color:var(--oro);padding:4px 12px;border-radius:14px;font-size:.8rem;z-index:3}
+.envres{position:absolute;left:10px;bottom:34px;max-width:60%;background:#000a;border:1px solid var(--oro);color:var(--oro);padding:4px 12px;border-radius:14px;font-size:.8rem;z-index:3}
+.marc{position:absolute;right:6px;top:6px;display:flex;gap:8px;z-index:4;background:#00000066;border-radius:12px;padding:6px 8px}
+.marc .col{display:flex;flex-direction:column;align-items:center;gap:2px}
+.marc .tt{font:600 .62rem "Source Serif 4",Georgia,serif;letter-spacing:.1em;text-transform:uppercase}
+.marc .sec{font-size:.55rem;color:#ffffff99;letter-spacing:.14em;text-transform:uppercase;margin-top:3px}
+.marc svg{width:26px;height:26px;display:block}
+@media(max-width:560px){.marc{gap:5px;padding:4px 5px}.marc svg{width:18px;height:18px}.hdr,.lane{grid-template-columns:100px repeat(3,max(calc(var(--ch)*.5),52px))}}
 .bubble{position:absolute;left:10px;top:34px;max-width:70%;background:#000a;border:1px solid var(--linea);padding:4px 12px;border-radius:14px;font-size:.85rem;z-index:3}
-#bchat{display:none;position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 68px);z-index:6;background:#0a0f0cf5;border-top:1px solid var(--linea);padding:10px 12px}
+#bchat{display:none;position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 52px);z-index:6;background:#0a0f0cf5;border-bottom:1px solid var(--linea);padding:10px 12px}
 #bchat.on{display:block}
 #bchat .chatlog{max-height:110px;margin-bottom:8px}
 #bchat .fila{margin-bottom:8px}
@@ -522,6 +528,24 @@ function cOro(c,ch,cls){
   else{pp.append(h("span","fg",FIG[n]));const i=icono(p);i.classList.add("fi");pp.append(i)}
   e.append(t,pp,b);e.setAttribute("aria-label",n+" de "+PALOS[p].toLowerCase());return e}
 function dOro(ch){const e=h("div","c dorso");e.style.setProperty("--ch",ch+"px");return e}
+function caja(k,col){
+  const s=document.createElementNS("http://www.w3.org/2000/svg","svg");s.setAttribute("viewBox","0 0 30 30");
+  const L=[[5,5,25,5],[25,5,25,25],[25,25,5,25],[5,25,5,5],[5,25,25,5]];
+  s.innerHTML=L.map((d,i)=>'<line x1="'+d[0]+'" y1="'+d[1]+'" x2="'+d[2]+'" y2="'+d[3]+'" stroke="'+(i<k?col:"#ffffff22")+'" stroke-width="3" stroke-linecap="round"/>').join("");
+  return s;
+}
+function marcador(E,eq,mt){
+  const w=h("div","marc");w.setAttribute("aria-label","Puntos");
+  [...E.pts.keys()].sort((a,b)=>(a===mt)-(b===mt)).forEach(t=>{
+    const col=t===mt?"#e8c46a":t===(mt===0?1:0)?"#7fb3ff":"#e57a6a";
+    const bu=E.meta===30&&E.bu&&E.bu[t],pt=E.pts[t],mal=bu?15:Math.min(15,pt),bue=bu?pt:0;
+    const c=h("div","col"),tt=h("div","tt",eq(t));tt.style.color=col;c.append(tt);
+    const sec=(txt,n)=>{c.append(h("div","sec",txt));for(let i=0;i<3;i++)c.append(caja(Math.max(0,Math.min(5,n-5*i)),col))};
+    sec("Malas",mal);if(E.meta===30)sec("Buenas",bue);
+    w.append(c);
+  });
+  return w;
+}
 function armaChatSala(){
   const c=h("div");c.id="bchat";
   const log=h("div","chatlog");log.id="bclog";log.setAttribute("aria-live","polite");
@@ -545,7 +569,7 @@ function verPartida(){
   mesa.style.setProperty("--ch",ch+"px");
   const hd=h("div","hdr");hd.append(h("span"));
   [0,1,2].forEach(b=>hd.append(h("span",0,["1ra","2da","3ra"][b]+(E.w[b]===-1?": Parda":E.w[b]>=0?": "+eq(E.w[b]):""))));
-  mesa.append(hd);
+  mesa.append(hd);mesa.append(marcador(E,eq,mt));
   for(let k=1;k<=n;k++){
     const i=(yo+k)%n,mate=i!==yo&&n!==3&&tm(E,i)===mt,l=h("div","lane"),nc=h("div","nm"),nn=h("span",mate?"mt":0,nom(i)+(mate?" (compañero)":"")+(i===E.mano?" (mano)":""));nc.append(nn);
     if(i!==yo)E.m[i].forEach(c=>{const d=mate?cOro(c,Math.max(40,Math.round(ch*.62))):dOro(Math.round(ch*.45));d.style.flex="none";nc.append(d)});
