@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Truco argentino</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bevan&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+:root{
+  color-scheme: dark;
+  --paño:#0c1410; --paño2:#13201a; --linea:#2a3c32;
+  --crema:#eadfc4; --tenue:#9fae9f; --rojo:#c1392d; --oro:#d2a23f;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paño);color:var(--crema);font-family:"Source Serif 4",Georgia,"Times New Roman",serif;font-size:18px;line-height:1.65}
+main{max-width:860px;margin:0 auto;padding:0 22px 80px}
+h1,h2,h3{font-family:Bevan,"Rockwell","Georgia",serif;font-weight:400;line-height:1.1;margin:0}
+a{color:var(--oro)}
+
+.hero{padding:72px 0 56px;display:grid;gap:36px}
+.hero h1{font-size:clamp(3.4rem,14vw,7.5rem);letter-spacing:-.01em;color:var(--crema)}
+.hero h1 span{display:block;color:var(--rojo);font-size:.38em;letter-spacing:0;margin-top:.5em}
+.hero p{max-width:34em;color:var(--tenue);margin:0}
+.fan{display:flex;height:150px;align-items:flex-end}
+.carta{width:92px;height:140px;border-radius:9px;background:var(--crema);color:#1a1a1a;border:2px solid #000;display:flex;flex-direction:column;justify-content:space-between;padding:8px 9px;font-family:Bevan,Georgia,serif;font-size:1.35rem;margin-right:-34px;box-shadow:-6px 4px 14px #000a;transform-origin:bottom center}
+.carta small{font-family:"Source Serif 4",Georgia,serif;font-size:.62rem;font-weight:600;letter-spacing:.02em}
+.carta b{align-self:flex-end;transform:rotate(180deg);font-weight:400}
+.carta.e{color:#16306b;transform:rotate(-12deg)}
+.carta.b{color:#2f5a1f;transform:rotate(-4deg)}
+.carta.o{color:#9a6b00;transform:rotate(4deg)}
+.carta.c{color:var(--rojo);transform:rotate(12deg)}
+
+section{padding:48px 0 0}
+h2{font-size:clamp(1.8rem,5vw,2.6rem);margin-bottom:14px;color:var(--oro)}
+h3{font-size:1.25rem;margin-bottom:6px}
+p{margin:0 0 1em;max-width:40em}
+.nota{color:var(--tenue)}
+
+/* Jerarquía: sí es una secuencia, por eso se numera */
+ol.rank{list-style:none;margin:26px 0 0;padding:0;border-top:1px solid var(--linea)}
+ol.rank li{display:grid;grid-template-columns:2.2em 1fr;gap:6px 14px;padding:14px 0;border-bottom:1px solid var(--linea);align-items:baseline}
+ol.rank .n{font-family:Bevan,Georgia,serif;color:var(--tenue);font-size:1.1rem;text-align:right}
+ol.rank .t{font-weight:600}
+ol.rank .a{grid-column:2;color:var(--tenue);font-size:.92rem}
+ol.rank li:nth-child(-n+4){background:linear-gradient(90deg,#c1392d1f,transparent 70%)}
+ol.rank li:nth-child(-n+4) .n{color:var(--rojo)}
+
+.cantos{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0;border:1px solid var(--linea);margin-top:22px}
+.cantos div{padding:20px 22px;border-right:1px solid var(--linea);border-bottom:1px solid var(--linea);margin:-1px -1px 0 0;background:var(--paño2)}
+.cantos .pts{font-family:Bevan,Georgia,serif;font-size:2rem;color:var(--rojo);line-height:1}
+.cantos p{margin:6px 0 0;font-size:.95rem;color:var(--tenue)}
+
+.ejemplo{background:var(--paño2);border-left:3px solid var(--oro);padding:16px 20px;margin:20px 0}
+.ejemplo p{margin:0}
+
+.dialogo{margin-top:22px;font-style:italic;display:grid;gap:4px}
+.dialogo span:nth-child(even){color:var(--oro);padding-left:1.6em}
+
+footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--linea);color:var(--tenue);font-size:.9rem}
+:focus-visible{outline:2px solid var(--oro);outline-offset:3px}
+@media (prefers-reduced-motion:no-preference){
+  .carta{transition:transform .25s ease}
+  .fan:hover .carta.e{transform:rotate(-20deg) translateY(-6px)}
+  .fan:hover .carta.b{transform:rotate(-7deg) translateY(-10px)}
+  .fan:hover .carta.o{transform:rotate(7deg) translateY(-10px)}
+  .fan:hover .carta.c{transform:rotate(20deg) translateY(-6px)}
+}
+.jugar{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);right:14px;z-index:20;background:#2e9b57;color:#04110a;border:0;border-radius:999px;padding:10px 26px;font:400 1.05rem Bevan,Georgia,serif;cursor:pointer;box-shadow:0 4px 18px #2e9b5760}
+.jugar:hover{background:#3bb66a}
+#juego{position:fixed;inset:0;z-index:30;background:var(--paño);overflow:auto;display:none;padding:calc(env(safe-area-inset-top,0px) + 16px) 18px 40px}
+#juego.on{display:block}
+.jw{max-width:860px;margin:0 auto}
+.jtop{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.btn{border-radius:999px;border:1px solid var(--linea);background:var(--paño2);color:var(--crema);padding:9px 20px;font:600 1rem "Source Serif 4",Georgia,serif;cursor:pointer}
+.btn.v{background:#2e9b57;border-color:#2e9b57;color:#04110a}
+.btn:disabled{opacity:.45;cursor:default}
+#juego input{background:#0a110e;border:1px solid var(--linea);border-radius:999px;color:var(--crema);padding:10px 16px;font:inherit;min-width:0}
+.panel{background:var(--paño2);border:1px solid var(--linea);border-radius:14px;padding:18px;margin-top:18px}
+.panel h3{margin-bottom:12px}
+.fila{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.sala-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--linea)}
+.cod{font-family:Bevan,Georgia,serif;font-size:2.2rem;letter-spacing:.18em;color:var(--oro);margin:0}
+#jmsg{color:var(--rojo);min-height:1.4em;margin:12px 0 0}
+.mesa{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.asiento{border:1px solid var(--linea);border-radius:12px;padding:12px;background:#0a110e}
+.asiento.yo{border-color:#2e9b57}
+.cartas{display:flex;gap:8px;flex-wrap:wrap;min-height:70px;margin-top:8px}
+.carta.jc{margin:0;transform:none;width:84px;height:124px;box-shadow:0 3px 10px #000a}
+.carta.jc b{font-size:1.5rem}
+.carta.chica{width:46px;height:68px;font-size:.8rem;padding:4px 5px}
+.carta.chica small{display:none}
+.carta.p0{color:#16306b}.carta.p1{color:#2f5a1f}.carta.p2{color:#9a6b00}.carta.p3{color:var(--rojo)}
+.carta.dorso{background:repeating-linear-gradient(45deg,#7a1f18,#7a1f18 6px,#5c1510 6px,#5c1510 12px);border-color:var(--crema)}
+.mano .carta{cursor:pointer}
+.mano .carta:hover{transform:translateY(-8px)}
+.btn.sel{border-color:#2e9b57;background:#1c4a30}
+.chatlog{max-height:220px;overflow:auto;margin-bottom:12px;padding:10px 12px;background:#0a110e;border:1px solid var(--linea);border-radius:12px;min-height:60px}
+.msg{margin:0 0 6px;max-width:none;font-size:.95rem;overflow-wrap:anywhere}
+.msg.yo strong{color:#3bb66a}
+.carta.vacio{background:transparent;border:2px dashed var(--linea);box-shadow:none}
+.btn.v:disabled{background:#2e9b57}
+#juego.jugando{padding:0;overflow:hidden}
+#juego.jugando .jw,#juego.jugando #jmsg{display:none}
+#partida{display:none}
+#juego.jugando #partida{display:grid;grid-template-rows:auto 1fr auto auto;height:100%;position:relative;overflow:hidden}
+.ptop{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 8px) 12px 8px}
+.ptop strong{font:400 .9rem Bevan,Georgia,serif;text-align:center}
+.ptop .btn{padding:7px 14px;font-size:.9rem}
+.tmesa{position:relative;overflow:hidden;min-height:0;background:radial-gradient(ellipse at 50% 40%,#17402c,#0a1c14 75%);display:flex;flex-direction:column;justify-content:center;gap:4px;padding:6px 10px}
+.hdr,.lane{display:grid;grid-template-columns:96px repeat(3,max(calc(var(--ch)*.5),66px));align-items:center}
+.hdr span{font-size:.72rem;color:var(--oro);white-space:nowrap}
+.lane{height:calc(var(--ch) + 4px)}
+.lane .nm{font-size:.78rem;overflow:hidden;white-space:nowrap}
+.c{width:calc(var(--ch)*.66);height:var(--ch);flex:none;border-radius:calc(var(--ch)*.08);background:linear-gradient(155deg,#2b2310,#0c0a05);border:2px solid var(--oro);box-shadow:0 3px 10px #000a,inset 0 0 0 3px #0c0a05,inset 0 0 0 4px #d2a23f66;color:#e8c46a;display:flex;flex-direction:column;justify-content:space-between;padding:calc(var(--ch)*.06);font-family:Bevan,Georgia,serif}
+.c small{font:600 calc(var(--ch)*.1)/1 "Source Serif 4",Georgia,serif;letter-spacing:.04em}
+.c b{font-weight:400;font-size:calc(var(--ch)*.34);align-self:center;text-shadow:0 0 8px #d2a23f66}
+.lane .c small{display:none}
+.c.dorso{background:repeating-linear-gradient(45deg,#2a2210,#2a2210 5px,#46391a 5px,#46391a 10px)}
+.toast{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);background:#000c;border:1px solid var(--oro);color:var(--oro);padding:4px 14px;border-radius:999px;font-size:.85rem;white-space:nowrap}
+.mano-pov{position:relative;height:calc(var(--hh)*.8);overflow:hidden;display:flex;justify-content:center;align-items:flex-start;padding-top:12px;background:#0a0f0c}
+.mano-pov::after{content:"";position:absolute;left:50%;bottom:-34px;width:170px;height:80px;transform:translateX(-50%);background:radial-gradient(ellipse at 50% 30%,#8a6a4d,#4a3524 70%);border-radius:50% 50% 0 0;pointer-events:none}
+.hc{margin:0 -14px;transform-origin:50% 130%}
+.hc.sin{filter:brightness(.6)}
+.hc:not(.sin){cursor:pointer}
+.hc:not(.sin):hover{filter:brightness(1.25)}
+.pbar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px 12px calc(env(safe-area-inset-bottom,0px) + 12px);background:#0a0f0c}
+.pbar .btn{padding:12px 4px;font-size:.95rem}
+.sheet{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 68px);display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:10px;background:#0a0f0cf0;border-top:1px solid var(--linea);z-index:5}
+.vel{position:absolute;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;z-index:9;padding:18px}
+.vel .panel{margin:0;text-align:center}
+</style>
+</head>
+<body>
+<button class="jugar" id="bjugar" type="button">Jugar</button>
+<main>
+<header class="hero">
+  <div class="fan" aria-hidden="true">
+    <div class="carta e"><small>ESPADAS</small><b>1</b></div>
+    <div class="carta b"><small>BASTOS</small><b>1</b></div>
+    <div class="carta o"><small>ORO</small><b>7</b></div>
+    <div class="carta c"><small>COPAS</small><b>3</b></div>
+  </div>
+  <h1>Truco<span>El juego de cartas que se juega con la cara</span></h1>
+  <p>Truco argentino con baraja española de 40 cartas, de a dos, cuatro o seis. Se gana con buenas cartas, pero más con aguante: la mitad del juego es mentir bien.</p>
+</header>
+
+<section id="orden">
+  <h2>El orden de las cartas</h2>
+  <p>En el truco no vale el número de la carta sino su lugar en esta escalera. Las cuatro primeras se llaman «matas» y mandan sobre todo lo demás.</p>
+  <ol class="rank">
+    <li><span class="n">1</span><span class="t">Ancho de espadas</span><span class="a">El 1 de espadas. La mejor carta del mazo.</span></li>
+    <li><span class="n">2</span><span class="t">Ancho de bastos</span><span class="a">El 1 de bastos.</span></li>
+    <li><span class="n">3</span><span class="t">Siete de espadas</span><span class="a">El «siete bravo».</span></li>
+    <li><span class="n">4</span><span class="t">Siete de oros</span><span class="a">El «siete bello».</span></li>
+    <li><span class="n">5</span><span class="t">Los 3</span><span class="a">De los cuatro palos.</span></li>
+    <li><span class="n">6</span><span class="t">Los 2</span><span class="a">De los cuatro palos.</span></li>
+    <li><span class="n">7</span><span class="t">Ases falsos</span><span class="a">El 1 de copas y el 1 de oros.</span></li>
+    <li><span class="n">8</span><span class="t">Los reyes</span><span class="a">Los 12.</span></li>
+    <li><span class="n">9</span><span class="t">Los caballos</span><span class="a">Los 11.</span></li>
+    <li><span class="n">10</span><span class="t">Las sotas</span><span class="a">Los 10.</span></li>
+    <li><span class="n">11</span><span class="t">Siete de copas y de bastos</span><span class="a">Los sietes «falsos».</span></li>
+    <li><span class="n">12</span><span class="t">Los 6</span><span class="a">De los cuatro palos.</span></li>
+    <li><span class="n">13</span><span class="t">Los 5</span><span class="a">De los cuatro palos.</span></li>
+    <li><span class="n">14</span><span class="t">Los 4</span><span class="a">Las peores cartas. Las que nadie quiere ver en la mano.</span></li>
+  </ol>
+</section>
+
+<section id="mano">
+  <h2>Cómo se juega una mano</h2>
+  <p>Se reparten tres cartas a cada jugador y se juegan tres rondas, o «bazas». Quien gana dos bazas se lleva la mano. Si hay empate en la primera, decide la segunda; si se empata todo, gana quien sea mano, es decir, quien jugó primero.</p>
+  <p>Se juega a 30 puntos, divididos en dos mitades de 15: primero las «malas» y después las «buenas». Se anotan con porotos o fósforos.</p>
+</section>
+
+<section id="truco">
+  <h2>Los cantos del truco</h2>
+  <p>En cualquier momento de la mano se puede subir la apuesta. El rival responde «quiero» o «no quiero». Si no quiere, el que cantó se lleva los puntos de la apuesta anterior.</p>
+  <div class="cantos">
+    <div><h3>Truco</h3><div class="pts">2</div><p>Quien lo canta apuesta dos puntos por la mano.</p></div>
+    <div><h3>Retruco</h3><div class="pts">3</div><p>Lo canta quien recibió el truco, subiendo la apuesta.</p></div>
+    <div><h3>Vale cuatro</h3><div class="pts">4</div><p>El tope. Después de esto no hay más para subir.</p></div>
+  </div>
+  <div class="dialogo">
+    <span>—¡Truco!</span>
+    <span>—¡Quiero retruco!</span>
+    <span>—¡Quiero vale cuatro!</span>
+    <span>—…Me voy al mazo.</span>
+  </div>
+</section>
+
+<section id="envido">
+  <h2>El envido</h2>
+  <p>Es un juego paralelo que solo se canta en la primera baza. Cuenta la suma de dos cartas del mismo palo más 20. Las figuras (10, 11 y 12) valen cero, y las demás valen su número.</p>
+  <div class="ejemplo"><p>Tenés el 7 y el 6 de copas: 20 + 7 + 6 = <strong>33</strong>. Si todas tus cartas son de palos distintos, cuenta solo tu carta más alta: un 7 vale 7.</p></div>
+  <div class="cantos">
+    <div><h3>Envido</h3><div class="pts">2</div><p>Se puede cantar hasta dos veces seguidas.</p></div>
+    <div><h3>Real envido</h3><div class="pts">3</div><p>Sube la apuesta del envido.</p></div>
+    <div><h3>Falta envido</h3><div class="pts">?</div><p>Vale lo que le falta al que va ganando para terminar la partida.</p></div>
+  </div>
+  <p class="nota" style="margin-top:18px">En caso de empate de tantos gana quien es mano.</p>
+</section>
+
+<section id="flor">
+  <h2>La flor</h2>
+  <p>Si te tocan las tres cartas del mismo palo, tenés flor y valen puntos extra. Es una variante que se pacta antes de empezar: en algunas mesas se juega y en otras no, así que preguntalo antes de repartir.</p>
+</section>
+
+<section id="señas">
+  <h2>Las señas</h2>
+  <p>En el truco por parejas, los compañeros se avisan qué cartas tienen con gestos discretos: guiñar el ojo, subir las cejas, morder el labio o sacar la lengua de costado. Cada pareja arma su código, y el rival que lo descubre tiene medio juego ganado.</p>
+</section>
+
+<footer>Truco argentino. Las reglas varían de mesa en mesa: lo que vale es lo que se pacta antes de jugar.</footer>
+</main>
+<div id="juego" role="dialog" aria-modal="true" aria-label="Jugar al truco"><div class="jw">
+  <div class="jtop"><h2>Jugar</h2><button class="btn" id="bcerrar" type="button">Cerrar</button></div>
+  <div id="jbody"></div><p id="jmsg" role="status"></p>
+</div><div id="partida"></div></div>
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const h=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+const PALOS=["Espadas","Bastos","Oros","Copas"],NUMS=[1,2,3,4,5,6,7,10,11,12];
+const DECK=[];for(let p=0;p<4;p++)for(const n of NUMS)DECK.push(p*100+n);
+let db=null,uid=null,nombre="",code=null,unsub=[],lista=[],busy=false,cupo=2,aviso="",nBot=0,meta=15,racha=0,G=null,tBot=0,tNext=0,tKey="",ui={},contado=0;
+try{racha=+localStorage.getItem("truco-racha")||0}catch(e){}
+let S={sala:null,jug:[]};
+function msg(t){$("#jmsg").textContent=t||""}
+function limpiar(){unsub.forEach(f=>{try{f()}catch(e){}});unsub=[]}
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function barajar(r){const d=DECK.slice();for(let k=d.length-1;k>0;k--){const j=Math.floor(r()*(k+1));[d[k],d[j]]=[d[j],d[k]]}return d}
+function valor(c){const p=Math.floor(c/100),n=c%100;if(n===1)return p===0?14:p===1?13:8;if(n===7)return p===0?12:p===2?11:4;return{3:10,2:9,12:7,11:6,10:5,6:3,5:2,4:1}[n]}
+function gallo(s){const o=s.orden||[];return o.length===3?o[(s.ronda-1)%3]:null}
+function mano(s,id){const o=s.orden||[],i=o.indexOf(id);if(i<0)return[];const g=gallo(s),d=barajar(rng(s.semilla));let off=0;for(let k=0;k<i;k++)off+=o[k]===g?4:3;return d.slice(off,off+(id===g?4:3))}
+function carta(c,x){const p=Math.floor(c/100),n=c%100,e=h("div","carta jc p"+p+(x?" "+x:""));e.append(h("small",0,PALOS[p].toUpperCase()),h("b",0,String(n)));e.setAttribute("aria-label",n+" de "+PALOS[p].toLowerCase());return e}
+function dorso(){const e=h("div","carta jc chica dorso");e.setAttribute("aria-label","Carta boca abajo");return e}
+function vacio(){return h("div","carta jc chica vacio")}
+function genCode(){const a="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let s="";for(let i=0;i<4;i++)s+=a[Math.floor(Math.random()*a.length)];return s}
+function clicable(e,fn){e.tabIndex=0;e.setAttribute("role","button");e.onclick=fn;e.onkeydown=ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();fn()}};return e}
+
+async function abrir(){
+  $("#juego").classList.add("on");document.body.style.overflow="hidden";msg("");
+  $("#jbody").replaceChildren(h("p","nota","Conectando…"));
+  db=null;uid=null;aviso="";
+  try{
+    if(!window.claude)throw 0;
+    const u=await claude.use("user");db=await claude.use("db");
+    if(u)uid=await u.id();
+    if(!db||!uid)throw 0;
+    if(u&&(await u.can("data.write"))===false){db=null;aviso="Tu acceso es de solo lectura: podés jugar contra el bot, pero no crear salas ni unirte."}
+  }catch(e){db=null;aviso="El multijugador necesita abrir la página desde claude.ai con tu sesión iniciada. Mientras tanto, podés jugar contra el bot."}
+  lobby();
+}
+function cerrar(){cierraP();limpiar();if(code)salir(true);$("#juego").classList.remove("on");document.body.style.overflow=""}
+
+function lobby(){
+  cierraP();limpiar();code=null;S={sala:null,jug:[]};msg("");
+  const b=$("#jbody");b.replaceChildren();
+  const p1=h("div","panel");p1.append(h("h3",0,"Tu nombre"));
+  const nom=h("input");nom.maxLength=16;nom.placeholder="Cómo te llaman";nom.value=nombre;nom.setAttribute("aria-label","Tu nombre");nom.oninput=()=>{nombre=nom.value.trim()};
+  p1.append(nom);
+  const pb=h("div","panel");pb.append(h("h3",0,"Jugar contra un bot"));
+  pb.append(h("p","nota","Partida completa contra el bot: truco, envido, flor y mazo."),metaRow(),h("p","nota","Tu racha de victorias: "+racha));
+  const bb=h("button","btn v","Jugar con el bot");bb.type="button";bb.onclick=bot;pb.append(bb);
+  b.append(p1,pb);
+  if(!db){const pa=h("div","panel");pa.append(h("h3",0,"Multijugador"),h("p","nota",aviso));b.append(pa);return}
+  const pc=h("div","panel");pc.append(h("h3",0,"Crear una sala"));
+  pc.append(h("p","nota","Elegí cuántos juegan. Con 3 se juega al truco gallo: el gallo reparte, agarra 4 cartas y deja una."));
+  const fc=h("div","fila");
+  [2,3,4,6,8].forEach(n=>{const x=h("button","btn"+(n===cupo?" sel":""),n===3?"3 (gallo)":n+" jugadores");x.type="button";x.setAttribute("aria-pressed",String(n===cupo));x.onclick=()=>{cupo=n;lobby()};fc.append(x)});
+  const bc=h("button","btn v","Crear sala");bc.type="button";bc.onclick=crear;
+  pc.append(fc,metaRow(),h("p"),bc);
+  const p3=h("div","panel");p3.append(h("h3",0,"Unirme con un código"));
+  const f=h("div","fila");const ic=h("input");ic.maxLength=4;ic.placeholder="ABCD";ic.setAttribute("aria-label","Código de sala");ic.style.width="9em";ic.style.textTransform="uppercase";
+  const bu=h("button","btn","Unirme");bu.type="button";bu.onclick=()=>unirse(ic.value.trim().toUpperCase());
+  f.append(ic,bu);p3.append(f);
+  const p4=h("div","panel");p4.append(h("h3",0,"Buscar sala"));
+  const ul=h("div");ul.id="jlista";p4.append(ul);
+  b.append(pc,p3,p4);pintaLista();
+  unsub.push(db.collection("salas").where("estado","==","espera").onSnapshot(
+    s=>{lista=s.docs.map(d=>d.data()).filter(x=>x.creada>Date.now()-216e5).sort((a,c)=>c.creada-a.creada);pintaLista()},
+    ()=>msg("No se pudieron buscar salas.")));
+}
+function metaRow(){const f=h("div","fila");[15,30].forEach(m=>{const x=h("button","btn"+(m===meta?" sel":""),"A "+m+" puntos");x.type="button";x.setAttribute("aria-pressed",String(m===meta));x.onclick=()=>{meta=m;lobby()};f.append(x)});return f}
+function pintaLista(){
+  const ul=$("#jlista");if(!ul)return;ul.replaceChildren();
+  if(!lista.length){ul.append(h("p","nota","No hay salas abiertas. Creá una y compartí el código."));return}
+  for(const s of lista){
+    const r=h("div","sala-item");r.append(h("span",0,"Sala de "+(s.hostNombre||"alguien")+", "+(s.max||8)+" jugadores a "+(s.meta||15)+" ("+s.code+")"));
+    const e=h("button","btn","Entrar");e.type="button";e.onclick=()=>unirse(s.code);r.append(e);ul.append(r);
+  }
+}
+function okNombre(){if(!nombre){msg("Escribí tu nombre primero.");return false}return true}
+async function crear(){
+  if(!okNombre()||busy)return;busy=true;msg("");
+  try{
+    const c=genCode();
+    await db.doc("salas/"+c).set({code:c,host:uid,hostNombre:nombre,max:cupo,meta,estado:"espera",creada:Date.now(),semilla:0,orden:[],ronda:0});
+    await entrar(c);
+  }catch(e){msg("No se pudo crear la sala. Probá de nuevo.")}
+  busy=false;
+}
+async function unirse(c){
+  if(!okNombre()||busy)return;if(c.length!==4){msg("El código tiene 4 caracteres.");return}
+  busy=true;msg("");
+  try{
+    const d=await db.doc("salas/"+c).get();
+    if(!d.exists){msg("No existe una sala con el código "+c+".");busy=false;return}
+    const js=await db.collection("salas/"+c+"/jugadores").get();
+    if(js.size>=(d.data().max||8)&&!js.docs.some(x=>x.id===uid)){msg("La sala está llena.");busy=false;return}
+    await entrar(c);
+  }catch(e){msg("No se pudo entrar a la sala.")}
+  busy=false;
+}
+async function entrar(c){
+  limpiar();code=c;S={sala:null,jug:[]};
+  const ref=db.doc("salas/"+c+"/jugadores/"+uid),d=await ref.get();
+  await ref.set({nombre,t:d.exists?d.data().t:Date.now(),ronda:0,cartas:[],descarte:null});
+  const b=$("#jbody");b.replaceChildren();
+  const est=h("div");est.id="jestado";
+  const ch=h("div","panel");ch.append(h("h3",0,"Chat de la sala"));
+  const log=h("div","chatlog");log.id="jlog";log.setAttribute("aria-live","polite");
+  const fm=h("div","fila");const it=h("input");it.maxLength=200;it.placeholder="Escribí un mensaje";it.style.flex="1";it.setAttribute("aria-label","Mensaje");
+  const be=h("button","btn v","Enviar");be.type="button";
+  const env=async()=>{const t=it.value.trim();if(!t)return;it.value="";try{await db.collection("salas/"+code+"/chat").add({uid,nombre,texto:t,t:Date.now()})}catch(e){msg("No se pudo enviar el mensaje.")}};
+  be.onclick=env;it.onkeydown=e=>{if(e.key==="Enter")env()};
+  fm.append(it,be);ch.append(log,fm);b.append(est,ch);
+  unsub.push(db.doc("salas/"+c).onSnapshot(s=>{
+    if(!s.exists){if(code){msg("La sala se cerró.");lobby()}return}
+    S.sala=s.data();salaUI();
+  },()=>msg("Se perdió la conexión con la sala.")));
+  unsub.push(db.collection("salas/"+c+"/jugadores").onSnapshot(s=>{
+    S.jug=s.docs.map(x=>Object.assign({id:x.id},x.data())).sort((a,b)=>a.t-b.t);salaUI();
+  },()=>msg("Se perdió la conexión con la sala.")));
+  unsub.push(db.doc("salas/"+c+"/partida/estado").onSnapshot(s=>{if(s.exists){try{G=JSON.parse(s.data().s);verPartida()}catch(e){}}},()=>{}));
+  unsub.push(db.collection("salas/"+c+"/chat").orderBy("t","desc").limit(40).onSnapshot(s=>{
+    const l=$("#jlog");if(!l)return;l.replaceChildren();
+    s.docs.map(x=>x.data()).reverse().forEach(m=>{const p=h("p","msg"+(m.uid===uid?" yo":""));p.append(h("strong",0,(m.nombre||"Jugador")+": "),document.createTextNode(m.texto||""));l.append(p)});
+    l.scrollTop=l.scrollHeight;
+  },()=>{}));
+}
+async function salir(silencioso){
+  const c=code,host=S.sala&&S.sala.host===uid;limpiar();code=null;
+  try{await db.doc("salas/"+c).delete()}catch(e){}
+  if(!silencioso)lobby();
+}
+function empezar(){
+  const s=S.sala,jg=S.jug.slice(0,s.max||8);if(jg.length<(s.max||8)||busy)return;
+  const E={id:Date.now(),n:jg.length,meta:s.meta||15,u:jg.map(j=>j.id),nom:jg.map(j=>j.nombre||"Jugador"),pts:Array(jg.length===3?3:2).fill(0),mano:0};
+  nuevaMano(E);commit(E);db.doc("salas/"+code).update({estado:"jugando"}).catch(()=>{});
+}
+function salaUI(){
+  const s=S.sala,b=$("#jestado");if(!s||!code||!b)return;b.replaceChildren();
+  const host=s.host===uid,mx=s.max||8;
+  const top=h("div","panel");
+  top.append(h("h2",0,"Partida rápida"),h("p","nota","Pasales este código a tus amigos:"),h("p","cod",code));
+  top.append(h("p","nota",mx+" jugadores, a "+(s.meta||15)+" puntos."+(mx===3?" Truco gallo.":"")+" Si alguien se va, la sala se cierra."));
+  const f=h("div","fila");
+  if(host){const r=h("button","btn v","Empezar y repartir");r.type="button";r.disabled=S.jug.length<mx;r.onclick=empezar;f.append(r);
+    if(S.jug.length<mx)f.append(h("span","nota","Faltan "+(mx-S.jug.length)+"."))}
+  else f.append(h("span","nota","Esperando a que "+(s.hostNombre||"el anfitrión")+" reparta."));
+  const sa=h("button","btn","Salir");sa.type="button";sa.onclick=()=>salir();f.append(sa);
+  top.append(f);b.append(top);
+  const pj=h("div","panel");pj.append(h("h3",0,"Jugadores ("+S.jug.length+" de "+mx+")"));
+  const fl=h("div","fila");S.jug.forEach(j=>fl.append(h("span","btn",(j.nombre||"Jugador")+(j.id===uid?" (vos)":""))));
+  pj.append(fl);b.append(pj);
+}
+
+/* ---- Motor del juego ---- */
+const VAL=[1,2,3,4],RK={envido:1,real:2,falta:3},NE={envido:"Envido",real:"Real envido",falta:"Falta envido"},NT=["","Truco","Retruco","Vale cuatro"];
+const tm=(E,i)=>E.n===3?i:i%2,nT=E=>E.n===3?3:2;
+const opp=(E,i)=>{for(let k=1;k<E.n;k++){const j=(i+k)%E.n;if(tm(E,j)!==tm(E,i))return j}};
+function tanto(x){const g={};x.forEach(c=>{const p=c/100|0;(g[p]=g[p]||[]).push(c%100>=10?0:c%100)});let b=0,m=0;for(const p in g){const a=g[p].sort((u,v)=>v-u);m=Math.max(m,a[0]);if(a.length>1)b=Math.max(b,20+a[0]+a[1])}return b||m}
+const tieneFlor=x=>x.every(c=>(c/100|0)===(x[0]/100|0));
+const okEnv=(cad,t)=>!cad.length||RK[t]>RK[cad[cad.length-1]]||(t==="envido"&&cad[cad.length-1]==="envido"&&cad.filter(z=>z==="envido").length<2);
+const sumEnv=(E,cad)=>cad.reduce((a,t)=>a+(t==="envido"?2:t==="real"?3:Math.max(1,E.meta-Math.max(...E.pts))),0);
+function chk(E){const mx=Math.max(...E.pts);if(mx>=E.meta){E.fase="fin";E.gan=E.pts.indexOf(mx);return 1}return 0}
+function term(E,g,p){E.pts[g]+=p;E.pend=null;E.guard=null;E.ult=[g,p];if(!chk(E))E.fase="finmano"}
+function nuevaMano(E){const d=barajar(Math.random);E.m=[];for(let i=0;i<E.n;i++)E.m.push(d.slice(i*3,i*3+3));E.orig=E.m.map(a=>a.slice());E.pl=E.m.map(()=>[]);E.w=[];E.turno=E.lider=E.mano;E.truco=0;E.derecho=-1;E.pend=null;E.guard=null;E.envHecho=false;E.flores=[];E.ult=null;E.msg="";E.fase="juego"}
+function baza(E){
+  const b=E.w.length;let best=-1,idx=[];
+  E.pl.forEach((a,i)=>{const v=valor(a[b]);if(v>best){best=v;idx=[i]}else if(v===best)idx.push(i)});
+  if(new Set(idx.map(i=>tm(E,i))).size>1){E.w.push(-1);E.turno=E.lider}else{E.w.push(tm(E,idx[0]));E.lider=E.turno=idx[0]}
+  const w=E.w;let g=null;
+  if(w.length===2){const[a,c]=w;if(a>=0&&c>=0&&a===c)g=a;else if(a>=0&&c===-1)g=a;else if(a===-1&&c>=0)g=c}
+  if(w.length===3)g=w[2]>=0?w[2]:w[0]>=0?w[0]:w[1]>=0?w[1]:tm(E,E.mano);
+  if(g!=null)term(E,g,VAL[E.truco]);
+}
+const ACT={
+  jugar(E,i,c){if(E.fase!=="juego"||E.pend||E.turno!==i||!E.m[i].includes(c))return 0;E.m[i]=E.m[i].filter(x=>x!==c);E.pl[i].push(c);const b=E.w.length;if(E.pl.every(a=>a.length>b))baza(E);else E.turno=(i+1)%E.n;return 1},
+  truco(E,i){if(E.fase!=="juego"||E.pend||E.truco>=3||(E.derecho>=0&&E.derecho!==tm(E,i)))return 0;E.pend={t:"truco",por:i,nivel:E.truco+1,resp:opp(E,i)};return 1},
+  envido(E,i,t){const p=E.pend;if(E.fase!=="juego"||E.w.length||E.envHecho||E.flores.length||!RK[t]||(p&&(p.t!=="truco"||p.resp!==i))||(!p&&E.truco>0))return 0;if(p)E.guard=p;E.pend={t:"envido",por:i,cad:[t],resp:opp(E,i)};return 1},
+  flor(E,i){if(E.fase!=="juego"||E.pend||E.w.length||E.pl[i].length||E.flores.includes(i)||!tieneFlor(E.orig[i]))return 0;E.flores.push(i);E.envHecho=true;E.pts[tm(E,i)]+=3;E.msg="Flor: +3";chk(E);return 1},
+  mazo(E,i){if(E.fase!=="juego"||E.pend)return 0;term(E,E.n===3?tm(E,(i+1)%3):1-tm(E,i),E.truco>0?VAL[E.truco]:1);return 1},
+  resp(E,i,r,x){
+    const p=E.pend;if(!p||p.resp!==i)return 0;
+    if(p.t==="truco"){
+      if(r==="quiero"){E.truco=p.nivel;E.derecho=tm(E,i);E.pend=null}
+      else if(r==="no")term(E,tm(E,p.por),VAL[p.nivel-1]);
+      else if(r==="subir"&&p.nivel<3){E.truco=p.nivel;E.pend={t:"truco",por:i,nivel:p.nivel+1,resp:opp(E,i)}}
+      else return 0;
+      return 1;
+    }
+    if(r==="subir"){if(!okEnv(p.cad,x))return 0;E.pend={t:"envido",por:i,cad:p.cad.concat(x),resp:opp(E,i)};return 1}
+    if(r==="quiero"){
+      const pts=sumEnv(E,p.cad),T=Array(nT(E)).fill(-1);
+      E.orig.forEach((x2,j)=>{T[tm(E,j)]=Math.max(T[tm(E,j)],tanto(x2))});
+      let w=0;T.forEach((v,t)=>{if(v>T[w]||(v===T[w]&&t===tm(E,E.mano)))w=t});
+      E.pts[w]+=pts;E.msg="Envido "+T.join(" a ")+": +"+pts;
+    }else if(r==="no"){E.pts[tm(E,p.por)]+=p.cad.length>1?sumEnv(E,p.cad.slice(0,-1)):1;E.msg="No quiso el envido"}
+    else return 0;
+    E.envHecho=true;E.pend=E.guard;E.guard=null;chk(E);return 1;
+  }
+};
+const puede=(a,i,x,y)=>{if(!G)return false;const E=JSON.parse(JSON.stringify(G));return!!ACT[a](E,i,x,y)};
+function commit(E){
+  G=E;verPartida();
+  if(code&&db)db.doc("salas/"+code+"/partida/estado").set({s:JSON.stringify(E)}).catch(()=>msg("No se pudo enviar la jugada."));
+}
+function dispatch(a,i,x,y){ui.env=0;const E=JSON.parse(JSON.stringify(G));if(ACT[a](E,i,x,y))commit(E)}
+function botAct(){
+  const E=G;if(!E||code||E.fase!=="juego")return;
+  const B=1,p=E.pend,hb=E.m[B],f=Math.max(...hb.map(valor)),T=(a,x)=>puede(a,B,x)&&(dispatch(a,B,x),1);
+  if(p){if(p.resp!==B)return;dispatch("resp",B,p.t==="truco"?(f>=9||Math.random()<.3?"quiero":"no"):(tanto(E.orig[B])>=25||Math.random()<.25?"quiero":"no"));return}
+  if(E.turno!==B)return;
+  if(tieneFlor(E.orig[B])&&T("flor"))return;
+  if(tanto(E.orig[B])>=27&&Math.random()<.5&&T("envido","envido"))return;
+  if(f>=12&&Math.random()<.3&&T("truco"))return;
+  const b=E.w.length,rv=E.pl[0][b],ord=hb.slice().sort((u,v)=>valor(u)-valor(v));
+  let c=ord[0];if(rv==null)c=ord[Math.floor(Math.random()*ord.length)];else{const g=ord.filter(z=>valor(z)>valor(rv));if(g.length)c=g[0]}
+  T("jugar",c);
+}
+function bot(){limpiar();code=null;const E={id:Date.now(),n:2,meta,u:[],nom:["Vos","Bot"],pts:[0,0],mano:nBot++%2};nuevaMano(E);G=E;verPartida()}
+function cierraP(){clearTimeout(tBot);clearTimeout(tNext);tKey="";G=null;ui={};const j=$("#juego");j.classList.remove("jugando");$("#partida").replaceChildren()}
+function guardaRacha(){try{localStorage.setItem("truco-racha",String(racha))}catch(e){}}
+
+/* ---- Pantalla de juego ---- */
+function cOro(c,ch,cls){const p=c/100|0,n=c%100,e=h("div","c"+(cls?" "+cls:""));e.style.setProperty("--ch",ch+"px");e.append(h("small",0,PALOS[p].slice(0,3).toUpperCase()),h("b",0,String(n)));e.setAttribute("aria-label",n+" de "+PALOS[p].toLowerCase());return e}
+function dOro(ch){const e=h("div","c dorso");e.style.setProperty("--ch",ch+"px");return e}
+function verPartida(){
+  const E=G,P=$("#partida");if(!E||!P)return;
+  $("#juego").classList.add("jugando");P.replaceChildren();
+  const n=E.n,yo=code?Math.max(0,E.u.indexOf(uid)):0,mt=tm(E,yo);
+  const nom=i=>i===yo?"Vos":E.nom[i],eq=t=>t===mt?"Vos":(n===3?E.nom[t]:"Rival");
+  const top=h("div","ptop");
+  const ab=h("button","btn","Abandonar");ab.type="button";ab.onclick=()=>{ui.conf=1;verPartida()};
+  top.append(ab,h("strong",0,E.pts.map((p,t)=>eq(t)+" "+p).join("  –  ")+"  (a "+E.meta+")"),h("span","nota","Racha: "+racha));
+  const mesa=h("div","tmesa"),ch=Math.max(34,Math.min(104,Math.floor((innerHeight*.5-26)/n)-6));
+  mesa.style.setProperty("--ch",ch+"px");
+  const hd=h("div","hdr");hd.append(h("span"));
+  [0,1,2].forEach(b=>hd.append(h("span",0,["1ra","2da","3ra"][b]+(E.w[b]===-1?": Parda":E.w[b]>=0?": "+eq(E.w[b]):""))));
+  mesa.append(hd);
+  for(let k=1;k<=n;k++){
+    const i=(yo+k)%n,l=h("div","lane"),nc=h("div","nm",nom(i)+(i===E.mano?" (mano)":""));
+    if(i!==yo){const rest=E.m[i].length;nc.append(document.createTextNode(" "));for(let r=0;r<rest;r++){const d=dOro(Math.round(ch*.45));d.style.display="inline-block";d.style.marginRight="2px";d.style.verticalAlign="middle";nc.append(d)}}
+    l.append(nc);E.pl[i].forEach((c,b)=>{const e=cOro(c,ch);e.style.gridColumn=String(b+2);e.style.gridRow="1";e.style.zIndex=String(b);l.append(e)});
+    mesa.append(l);
+  }
+  const p=E.pend;let tx=E.msg||"";
+  if(p)tx=nom(p.por)+" canta "+(p.t==="truco"?NT[p.nivel]:NE[p.cad[p.cad.length-1]]);
+  if(E.fase==="finmano"&&E.ult)tx=eq(E.ult[0])+" gana la mano: +"+E.ult[1];
+  if(tx)mesa.append(h("div","toast",tx));
+  const hc=Math.round(Math.min(200,Math.max(110,innerHeight*.25))),mh=h("div","mano-pov");mh.style.setProperty("--hh",hc+"px");
+  const mine=E.m[yo]||[];
+  mine.forEach((c,k)=>{
+    const e=cOro(c,hc,"hc"),a=(k-(mine.length-1)/2)*11,ok=puede("jugar",yo,c);
+    e.style.transform="rotate("+a+"deg) translateY("+Math.abs(a)*.9+"px)";if(!ok)e.classList.add("sin");else clicable(e,()=>dispatch("jugar",yo,c));
+    mh.append(e);
+  });
+  const bar=h("div","pbar"),mk=(t,ok,fn)=>{const x=h("button","btn",t);x.type="button";x.disabled=!ok;x.onclick=fn;return x};
+  const envOk=["envido","real","falta"].some(t=>puede("envido",yo,t));
+  bar.append(
+    mk(E.truco>=3?"Vale cuatro":NT[E.truco+1],puede("truco",yo),()=>dispatch("truco",yo)),
+    mk("Envido",envOk,()=>{ui.env=!ui.env;verPartida()}),
+    mk("Flor",puede("flor",yo),()=>dispatch("flor",yo)),
+    mk("Mazo",puede("mazo",yo),()=>dispatch("mazo",yo)));
+  P.append(top,mesa,mh,bar);
+  if(p&&p.resp===yo){
+    const s=h("div","sheet"),q=(t,x,y)=>{const b=mk(t,1,()=>dispatch("resp",yo,x,y));b.classList.add(x==="quiero"?"v":"x");return b};
+    s.append(q("Quiero","quiero"),q("No quiero","no"));
+    if(p.t==="truco"&&p.nivel<3)s.append(q(NT[p.nivel+1],"subir"));
+    if(p.t==="envido")["envido","real","falta"].forEach(t=>{if(okEnv(p.cad,t))s.append(q(NE[t],"subir",t))});
+    if(p.t==="truco"&&E.w.length===0&&!E.envHecho&&!E.flores.length)["envido","real","falta"].forEach(t=>{if(t==="envido")s.append(mk("Envido primero",1,()=>dispatch("envido",yo,"envido")))});
+    P.append(s);
+  }else if(ui.env){
+    const s=h("div","sheet");["envido","real","falta"].forEach(t=>s.append(mk(NE[t],puede("envido",yo,t),()=>dispatch("envido",yo,t))));P.append(s);
+  }
+  if(ui.conf){
+    const v=h("div","vel"),pn=h("div","panel");pn.append(h("h3",0,"¿Abandonar la partida?"),h("p","nota",code?"La sala se va a cerrar para todos.":"Se corta tu racha."));
+    const f=h("div","fila");f.style.justifyContent="center";
+    const si=h("button","btn v","Sí, abandonar");si.type="button";si.onclick=()=>{racha=0;guardaRacha();ui={};code?salir():lobby()};
+    const no=h("button","btn","Seguir jugando");no.type="button";no.onclick=()=>{ui.conf=0;verPartida()};
+    f.append(si,no);pn.append(f);v.append(pn);P.append(v);
+  }
+  if(E.fase==="fin"){
+    if(contado!==E.id){contado=E.id;racha=E.gan===mt?racha+1:0;guardaRacha();top.lastChild.textContent="Racha: "+racha}
+    const v=h("div","vel"),pn=h("div","panel");pn.append(h("h2",0,E.gan===mt?"¡Ganaste!":"Perdiste"),h("p","nota","Racha de victorias: "+racha));
+    const b=h("button","btn v","Volver");b.type="button";b.onclick=()=>{code?salir():lobby()};pn.append(b);v.append(pn);P.append(v);return;
+  }
+  const k=JSON.stringify([E.pts,E.mano,E.fase]);
+  if(E.fase==="finmano"&&(!code||S.sala&&S.sala.host===uid)&&tKey!==k){tKey=k;clearTimeout(tNext);tNext=setTimeout(()=>{const X=JSON.parse(JSON.stringify(G));X.mano=(X.mano+1)%X.n;nuevaMano(X);commit(X)},2800)}
+  if(!code&&E.fase==="juego"){clearTimeout(tBot);tBot=setTimeout(botAct,1000)}
+}
+$("#bjugar").onclick=abrir;$("#bcerrar").onclick=cerrar;
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("#juego").classList.contains("on")&&!G)cerrar()});
+addEventListener("pagehide",()=>{if(code&&db)try{db.doc("salas/"+code).delete()}catch(e){}});
+})();
+</script>
+</body>
+</html>
