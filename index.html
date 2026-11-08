@@ -146,6 +146,7 @@ footer{margin-top:70px;padding-top:22px;border-top:1px solid var(--linea);color:
 .sheet{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 68px);display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:10px;background:#0a0f0cf0;border-top:1px solid var(--linea);z-index:5}
 .vel{position:absolute;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;z-index:9;padding:18px}
 .vel .panel{margin:0;text-align:center}
+.envres{position:absolute;right:10px;top:34px;max-width:55%;background:#000a;border:1px solid var(--oro);color:var(--oro);padding:4px 12px;border-radius:14px;font-size:.8rem;z-index:3}
 .bubble{position:absolute;left:10px;top:34px;max-width:70%;background:#000a;border:1px solid var(--linea);padding:4px 12px;border-radius:14px;font-size:.85rem;z-index:3}
 #bchat{display:none;position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 68px);z-index:6;background:#0a0f0cf5;border-top:1px solid var(--linea);padding:10px 12px}
 #bchat.on{display:block}
@@ -341,7 +342,10 @@ function guestRecibe(d,c){
   else if(d.t==="chat")chatAdd(d);
   else if(d.t==="cerrada"){limpiaNet();code=null;lobby();msg("La sala se cerró.")}
 }
-function chatAdd(m){const l=$("#jlog");if(!l)return;const p=h("p","msg"+(m.nombre===nombre?" yo":""));p.append(h("strong",0,(m.nombre||"Jugador")+": "),document.createTextNode(m.texto||""));l.append(p);l.scrollTop=l.scrollHeight}
+function chatAdd(m,propio){
+  [$("#jlog"),$("#bclog")].forEach(l=>{if(!l)return;const p=h("p","msg"+(m.nombre===nombre?" yo":""));p.append(h("strong",0,(m.nombre||"Jugador")+": "),document.createTextNode(m.texto||""));l.append(p);l.scrollTop=l.scrollHeight});
+  if(!propio&&G&&code){ui.bub=m.texto;ui.bubn=m.nombre||"Jugador";clearTimeout(bubT);bubT=setTimeout(()=>{ui.bub="";if(G)verPartida()},4500);verPartida()}
+}
 function entrarUI(){
   const b=$("#jbody");b.replaceChildren();
   const est=h("div");est.id="jestado";
@@ -360,7 +364,7 @@ function salir(sil){
 function empezar(){
   const s=S.sala,jg=S.jug.slice(0,s.max);if(!esHost||jg.length<s.max)return;
   s.estado="jugando";
-  const E={id:Date.now(),n:jg.length,meta:s.meta||15,u:jg.map(j=>j.id),nom:jg.map(j=>j.nombre||"Jugador"),pts:Array(jg.length===3?3:2).fill(0),mano:0};
+  const E={id:Date.now(),n:jg.length,meta:s.meta||15,u:jg.map(j=>j.id),nom:jg.map(j=>j.nombre||"Jugador"),pts:Array(jg.length===3?3:2).fill(0),bu:Array(jg.length===3?3:2).fill(false),mano:0};
   nuevaMano(E);difundeSala();commit(E);
 }
 function salaUI(){
@@ -387,10 +391,10 @@ const opp=(E,i)=>{for(let k=1;k<E.n;k++){const j=(i+k)%E.n;if(tm(E,j)!==tm(E,i))
 function tanto(x){const g={};x.forEach(c=>{const p=c/100|0;(g[p]=g[p]||[]).push(c%100>=10?0:c%100)});let b=0,m=0;for(const p in g){const a=g[p].sort((u,v)=>v-u);m=Math.max(m,a[0]);if(a.length>1)b=Math.max(b,20+a[0]+a[1])}return b||m}
 const tieneFlor=x=>x.every(c=>(c/100|0)===(x[0]/100|0));
 const okEnv=(cad,t)=>!cad.length||RK[t]>RK[cad[cad.length-1]]||(t==="envido"&&cad[cad.length-1]==="envido"&&cad.filter(z=>z==="envido").length<2);
-const sumEnv=(E,cad)=>cad.reduce((a,t)=>a+(t==="envido"?2:t==="real"?3:Math.max(1,E.meta-Math.max(...E.pts))),0);
-function chk(E){const mx=Math.max(...E.pts);if(mx>=E.meta){E.fase="fin";E.gan=E.pts.indexOf(mx);return 1}return 0}
+const sumEnv=(E,cad)=>cad.reduce((a,t)=>a+(t==="envido"?2:t==="real"?3:(E.bu&&E.bu.some(Boolean)?1:Math.max(1,15-Math.max(...E.pts)))),0);
+function chk(E){for(let t=0;t<E.pts.length;t++)if(E.pts[t]>=15){if(E.meta===30&&!(E.bu&&E.bu[t])){E.bu=E.bu||E.pts.map(()=>false);E.bu[t]=true;E.pts[t]-=15;E.bn=t}else{E.fase="fin";E.gan=t;return 1}}return 0}
 function term(E,g,p){E.pts[g]+=p;E.pend=null;E.guard=null;E.ult=[g,p];if(!chk(E))E.fase="finmano"}
-function nuevaMano(E){const d=barajar(Math.random);E.m=[];for(let i=0;i<E.n;i++)E.m.push(d.slice(i*3,i*3+3));E.orig=E.m.map(a=>a.slice());E.pl=E.m.map(()=>[]);E.w=[];E.turno=E.lider=E.mano;E.truco=0;E.derecho=-1;E.pend=null;E.guard=null;E.envHecho=false;E.flores=[];E.ult=null;E.msg="";E.fase="juego"}
+function nuevaMano(E){const d=barajar(Math.random);E.m=[];for(let i=0;i<E.n;i++)E.m.push(d.slice(i*3,i*3+3));E.orig=E.m.map(a=>a.slice());E.pl=E.m.map(()=>[]);E.w=[];E.turno=E.lider=E.mano;E.truco=0;E.derecho=-1;E.pend=null;E.guard=null;E.envHecho=false;E.flores=[];E.ult=null;E.msg="";E.envRes=null;E.bn=null;E.fase="juego"}
 function baza(E){
   const b=E.w.length;let best=-1,idx=[];
   E.pl.forEach((a,i)=>{const v=valor(a[b]);if(v>best){best=v;idx=[i]}else if(v===best)idx.push(i)});
@@ -421,7 +425,7 @@ const ACT={
       const pts=sumEnv(E,p.cad),T=Array(nT(E)).fill(-1);
       E.orig.forEach((x2,j)=>{T[tm(E,j)]=Math.max(T[tm(E,j)],tanto(x2))});
       let w=0;T.forEach((v,t)=>{if(v>T[w]||(v===T[w]&&t===tm(E,E.mano)))w=t});
-      E.pts[w]+=pts;E.msg="Envido "+T.join(" a ")+": +"+pts;
+      E.pts[w]+=pts;E.envRes={T:T.slice(),w,pts};E.msg="";
     }else if(r==="no"){E.pts[tm(E,p.por)]+=p.cad.length>1?sumEnv(E,p.cad.slice(0,-1)):1;E.msg="No quiso el envido"}
     else return 0;
     E.envHecho=true;E.pend=E.guard;E.guard=null;chk(E);return 1;
@@ -447,7 +451,7 @@ let bubT=0,bmsgs=[];
 function bsay(q,t){
   bmsgs.push([q,t]);const l=$("#bclog");
   if(l){const p=h("p","msg"+(q==="Vos"?" yo":""));p.append(h("strong",0,q+": "),document.createTextNode(t));l.append(p);l.scrollTop=l.scrollHeight}
-  if(q==="Bot"){ui.bub=t;clearTimeout(bubT);bubT=setTimeout(()=>{ui.bub="";if(G&&!code)verPartida()},4500);if(G&&!code)verPartida()}
+  if(q==="Bot"){ui.bub=t;ui.bubn="Bot";clearTimeout(bubT);bubT=setTimeout(()=>{ui.bub="";if(G&&!code)verPartida()},4500);if(G&&!code)verPartida()}
 }
 function respBot(){
   const D=G&&G.dif||"medio",pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -501,7 +505,7 @@ function botAct(){
   else c=b===0?ord[Math.min(1,ord.length-1)]:(E.w[0]===1?ord[0]:ord[ord.length-1]);
   T("jugar",c);
 }
-function bot(){limpiar();code=null;const E={id:Date.now(),n:2,meta,u:[],nom:["Vos","Bot"],pts:[0,0],mano:nBot++%2,dif};chatBel=0;chatT=0;ui={};nuevaMano(E);armaChat();G=E;verPartida()}
+function bot(){limpiar();code=null;const E={id:Date.now(),n:2,meta,u:[],nom:["Vos","Bot"],pts:[0,0],bu:[false,false],mano:nBot++%2,dif};chatBel=0;chatT=0;ui={};nuevaMano(E);armaChat();G=E;verPartida()}
 function cierraP(){clearTimeout(tBot);clearTimeout(tNext);tKey="";G=null;ui={};const j=$("#juego");j.classList.remove("jugando");$("#partida").replaceChildren();const bc=$("#bchat");if(bc)bc.remove()}
 function guardaRacha(){try{localStorage.setItem("truco-racha",String(racha))}catch(e){}}
 
@@ -518,6 +522,16 @@ function cOro(c,ch,cls){
   else{pp.append(h("span","fg",FIG[n]));const i=icono(p);i.classList.add("fi");pp.append(i)}
   e.append(t,pp,b);e.setAttribute("aria-label",n+" de "+PALOS[p].toLowerCase());return e}
 function dOro(ch){const e=h("div","c dorso");e.style.setProperty("--ch",ch+"px");return e}
+function armaChatSala(){
+  const c=h("div");c.id="bchat";
+  const log=h("div","chatlog");log.id="bclog";log.setAttribute("aria-live","polite");
+  const f=h("div","fila"),it=h("input");it.maxLength=200;it.placeholder="Escribí un mensaje";it.style.flex="1";it.setAttribute("aria-label","Mensaje");
+  const be=h("button","btn v","Enviar");be.type="button";
+  const env=()=>{const x=it.value.trim();if(!x)return;it.value="";const m={t:"chat",nombre,texto:x};chatAdd(m,1);if(esHost)conns.forEach(k=>{try{k.send(m)}catch(e){}});else try{hostConn.send(m)}catch(e){}};
+  be.onclick=env;it.onkeydown=e=>{if(e.key==="Enter")env()};
+  f.append(it,be);c.append(log,f);$("#juego").append(c);
+}
+function revancha(){if(!esHost||!G)return;const n=G.n,k=n===3?3:2,E={id:Date.now(),n,meta:G.meta,u:G.u,nom:G.nom,pts:Array(k).fill(0),bu:Array(k).fill(false),mano:0};nuevaMano(E);commit(E)}
 function verPartida(){
   const E=G,P=$("#partida");if(!E||!P)return;
   $("#juego").classList.add("jugando");P.replaceChildren();
@@ -526,7 +540,7 @@ function verPartida(){
   const top=h("div","ptop");
   const ab=h("button","btn","Abandonar");ab.type="button";ab.onclick=()=>{ui.conf=1;verPartida()};
   const cb=h("button","btn","Chat");cb.type="button";cb.onclick=()=>$("#bchat").classList.toggle("on");
-  top.append(ab,h("strong",0,E.pts.map((p,t)=>eq(t)+" "+p).join("  –  ")+"  (a "+E.meta+")"),...(code?[]:[cb]),h("span","nota","Racha: "+racha));
+  top.append(ab,h("strong",0,E.pts.map((p,t)=>eq(t)+" "+p+(E.meta===30?(E.bu&&E.bu[t]?" buenas":" malas"):"")).join("  –  ")+"  (a "+E.meta+")"),cb,h("span","nota","Racha: "+racha));
   const mesa=h("div","tmesa"),ch=Math.max(34,Math.min(124,Math.floor((innerHeight*.56-26)/n)-6));
   mesa.style.setProperty("--ch",ch+"px");
   const hd=h("div","hdr");hd.append(h("span"));
@@ -541,8 +555,10 @@ function verPartida(){
   const p=E.pend;let tx=E.msg||"";
   if(p)tx=nom(p.por)+" canta "+(p.t==="truco"?NT[p.nivel]:NE[p.cad[p.cad.length-1]]);
   if(E.fase==="finmano"&&E.ult)tx=eq(E.ult[0])+" gana la mano: +"+E.ult[1];
+  if(E.bn!=null)tx=(tx?tx+" – ":"")+eq(E.bn)+" pasa a buenas";
   if(tx)mesa.append(h("div","toast",tx));
-  if(ui.bub)mesa.append(h("div","bubble","Bot: "+ui.bub));
+  if(ui.bub)mesa.append(h("div","bubble",(ui.bubn||"Bot")+": "+ui.bub));
+  if(E.envRes){const r=E.envRes;mesa.append(h("div","envres","Envido: "+r.T.map((v,t)=>eq(t)+" "+v).join(" – ")+". Gana "+eq(r.w)+" (+"+r.pts+")"))}
   const hc=Math.round(Math.min(230,Math.max(125,innerHeight*.28))),mh=h("div","mano-pov");mh.style.setProperty("--hh",hc+"px");
   const mine=E.m[yo]||[];
   mine.forEach((c,k)=>{
@@ -558,6 +574,7 @@ function verPartida(){
     mk("Flor",puede("flor",yo),()=>dispatch("flor",yo)),
     mk("Mazo",puede("mazo",yo),()=>dispatch("mazo",yo)));
   P.append(top,mesa,mh,bar);
+  if(code&&!$("#bchat"))armaChatSala();
   if(p&&p.resp===yo){
     const s=h("div","sheet"),q=(t,x,y)=>{const b=mk(t,1,()=>dispatch("resp",yo,x,y));b.classList.add(x==="quiero"?"v":"x");return b};
     s.append(q("Quiero","quiero"),q("No quiero","no"));
@@ -578,7 +595,9 @@ function verPartida(){
   if(E.fase==="fin"){
     if(contado!==E.id){contado=E.id;racha=E.gan===mt?racha+1:0;guardaRacha();top.lastChild.textContent="Racha: "+racha}
     const v=h("div","vel"),pn=h("div","panel");pn.append(h("h2",0,E.gan===mt?"¡Ganaste!":"Perdiste"),h("p","nota","Racha de victorias: "+racha));
-    const b=h("button","btn v","Volver");b.type="button";b.onclick=()=>{code?salir():lobby()};pn.append(b);v.append(pn);P.append(v);return;
+    const b=h("button","btn","Volver");b.type="button";b.onclick=()=>{code?salir():lobby()};
+    if(code&&esHost){const rv=h("button","btn v","Revancha");rv.type="button";rv.onclick=revancha;pn.append(rv)}else if(code)pn.append(h("p","nota","Esperá la revancha del anfitrión, o tocá Volver (cierra la sala)."));
+    pn.append(b);v.append(pn);P.append(v);return;
   }
   const k=JSON.stringify([E.pts,E.mano,E.fase]);
   if(E.fase==="finmano"&&(!code||S.sala&&S.sala.host===uid)&&tKey!==k){tKey=k;clearTimeout(tNext);tNext=setTimeout(()=>{const X=JSON.parse(JSON.stringify(G));X.mano=(X.mano+1)%X.n;nuevaMano(X);commit(X)},2800)}
